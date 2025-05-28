@@ -1,87 +1,37 @@
-# @mixgarden/sdk
+# Mixgarden JavaScript SDK
 
-Tiny, zero‑dependency client for talking to the **Mixgarden** API and its plugin
-marketplace from Node or the browser.
-
-<p align="center">
-  <a href="https://www.npmjs.com/package/@mixgarden/sdk">
-    <img src="https://img.shields.io/npm/v/@mixgarden/sdk.svg" />
-  </a>
-  <a href="https://github.com/mixgarden/sdk-js/actions">
-    <img src="https://github.com/mixgarden/sdk-js/actions/workflows/ci.yml/badge.svg" />
-  </a>
-</p>
-
----
-
-## Install
+A lightweight promise‑based wrapper around the Mixgarden REST API.
 
 ```bash
-npm i @mixgarden/sdk          # or pnpm add / yarn add
+npm install @mixgarden/sdk
 ```
 
-Requires Node 18 + (or any modern browser).
-
----
-
-## Quick start
+- Use `models()` to get a list of available models.
+- Use `plugins()` to get a list of available plugins.
+- Use `conversations()` to get a list of available conversations.
+- Use `conversation(id)` to get a specific conversation.
+- Use `chat()` when you’re building a conversational UI, or want the platform to maintain context for you.
+- Use `getCompletion()` when you need a quick, stateless generation and want absolute control over the prompt and token usage. 
 
 ```ts
-import { Mixgarden } from "@mixgarden/sdk";
+import { MixgardenSDK } from '@mixgarden/sdk';
 
-const mg = new Mixgarden({ apiKey: process.env.MG_API_KEY });
+const sdk = new MixgardenSDK({ apiKey: process.env.MIXGARDEN_API_KEY });
 
-const { text } = await mg.chat(
-  "Rewrite this in pirate slang",
-  { pluginId: "tonepro" }
-);
-
-console.log(text);
+const models = await sdk.getModels();
+const chat = await sdk.chat({ 
+    model: "gpt-4o-mini", 
+    content: 'Hi there!', 
+    conversationId: '123', 
+    pluginId: '456', 
+    pluginSettings: { foo: 'bar' } 
+});
+const plugins = await sdk.getPlugins();
+const conversations = await sdk.getConversations();
+const conversation = await sdk.getConversation(conversations[0].id);
+const completion = await sdk.getCompletion({ 
+    model: models[0].id, 
+    messages: [{ role: 'user', content: 'Hi there!' }], 
+    maxTokens: 100, temperature: 0.7 
+});
 ```
-
----
-
-## API
-
-| Method | Purpose |
-| ------ | ------- |
-| `new Mixgarden({ apiKey, baseUrl? })` | create a client (default URL is `https://api.mixgarden.ai/v1`) |
-| `chat(prompt, opts)` | run a plugin (`opts = { pluginId, model?, params? }`) |
-| `listPlugins()` | return visible plugins |
-| `getPlugin(id)` | fetch one plugin’s metadata |
-
-All calls resolve to plain JSON.
-
----
-
-## TypeScript
-
-Bundled `.d.ts` files give full IntelliSense.
-
----
-
-## Examples
-
-* `examples/basic.mjs` – minimal Node script  
-* `examples/browser` – vanilla `<script type="module">` demo
-
-```bash
-node examples/basic.mjs
-```
-
----
-
-## Contributing
-
-```bash
-pnpm install
-pnpm run test
-```
-
-Follow Conventional Commits; releases are cut automatically from git tags.
-
----
-
-## License
-
-MIT

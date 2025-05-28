@@ -1,49 +1,30 @@
 {
   "name": "@mixgarden/sdk",
   "version": "0.1.0",
-  "description": "Tiny client for calling Mixgarden plugins",
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
+  "description": "JavaScript/TypeScript SDK for the Mixgarden API",
+  "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs",
-      "types": "./dist/index.d.ts"
-    }
-  },
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
-  ],
   "scripts": {
-    "build": "tsup src/index.ts --dts --format esm,cjs",
-    "dev": "tsup src/index.ts --dts --format esm,cjs --watch",
-    "test": "node examples/basic.mjs"
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
   },
-  "keywords": [
-    "mixgarden",
-    "sdk",
-    "llm",
-    "plugin"
-  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/mixgarden/sdk-js"
   },
-  "author": "Mixgarden",
+  "keywords": [
+    "mixgarden",
+    "sdk",
+    "ai",
+    "llm"
+  ],
   "license": "MIT",
-  "engines": {
-    "node": ">=18"
-  },
-  "sideEffects": false,
-  "dependencies": {
-    "undici": "^6.16.1"
-  },
   "devDependencies": {
-    "@types/node": "^22.15.21",
-    "tsup": "^8.0.1",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "@types/node": "^20.11.0",
+    "@types/axios": "^0.14.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
   }
 }
