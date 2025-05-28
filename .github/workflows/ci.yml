@@ -1,0 +1,26 @@
+name: Node CI
+
+# ── Run on every push to main and on PRs targeting main ──
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1) Check out repo
+      - uses: actions/checkout@v4
+
+      # 2) Install Node 20 and cache npm deps
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm        # speeds up subsequent runs
+
+      # 3) Install dependencies and compile TS → dist/
+      - run: npm ci
+      - run: npm run build
