@@ -19,12 +19,15 @@ import { MixgardenSDK } from '@mixgarden/sdk';
 const sdk = new MixgardenSDK({ apiKey: process.env.MIXGARDEN_API_KEY });
 
 const models = await sdk.getModels();
-const chat = await sdk.chat({ 
-    model: "gpt-4o-mini", 
-    content: 'Hi there!', 
-    conversationId: '123', 
-    pluginId: '456', 
-    pluginSettings: { foo: 'bar' } 
+const chat = await sdk.chat({
+model: "gpt-4o-mini",
+content: 'hello mixgarden!',
+pluginId: 'tone-pro',
+pluginSettings: {
+    'emotion-type': 'neutral',
+    'emotion-intensity': 6,
+    'personality-type': 'friendly'
+}
 });
 const plugins = await sdk.getPlugins();
 const conversations = await sdk.getConversations();

@@ -2,3 +2,6 @@ node_modules
 dist
 .env
 publish.md
+
+# demo files
+/examples/demo1.mjs

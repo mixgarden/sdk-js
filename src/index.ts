@@ -32,7 +32,7 @@ export class MixgardenSDK {
     this.baseUrl = baseUrl;
     this.client = axios.create({
       baseURL: baseUrl,
-      headers: { Authorization: `MixgardenAPIKey ${apiKey}` },
+      headers: { Authorization: `Bearer ${apiKey}` },
       timeout: 30_000
     });
   }
