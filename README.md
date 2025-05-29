@@ -21,14 +21,16 @@ const sdk = new MixgardenSDK({ apiKey: process.env.MIXGARDEN_API_KEY });
 
 const models = await sdk.getModels();
 const chat = await sdk.chat({
-model: "openai/gpt-4o-mini",
-content: 'hello mixgarden!',
-pluginId: 'tone-pro',
-pluginSettings: {
-    'emotion-type': 'neutral',
-    'emotion-intensity': 6,
-    'personality-type': 'friendly'
-}
+  model: "openai/gpt-4o-mini",
+  // Optionally add conversationId to add to an existing conversation
+  // conversationId: "your-convo-id",
+  content: 'hello mixgarden!',
+  pluginId: 'tone-pro',
+  pluginSettings: {
+      'emotion-type': 'neutral',
+      'emotion-intensity': 6,
+      'personality-type': 'friendly'
+  }
 });
 const plugins = await sdk.getPlugins();
 const conversations = await sdk.getConversations();

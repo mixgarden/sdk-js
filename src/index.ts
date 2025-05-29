@@ -56,8 +56,41 @@ export class MixgardenSDK {
     return this.request<any[]>('get', '/models');
   }
 
-  public chat(params: ChatParams) {
-    return this.request<any>('post', '/chat', params);
+  public async chat(params: ChatParams) {
+    if (params.conversationId) {
+      // Add message to existing conversation
+      const { conversationId, ...rest } = params;
+      await this.request<any>(
+        'post',
+        `/conversations/${conversationId}/messages`,
+        {
+          ...rest,
+          role: 'user', // Always set role
+        }
+      );
+      return this.getConversation(conversationId);
+    } else {
+      // Create a new conversation
+      const convoRes = await this.request<any>(
+        'post',
+        '/conversations',
+        params
+      );
+      const conversationId = convoRes.id;
+      const { model, pluginId, pluginSettings, content } = params;
+      await this.request<any>(
+        'post',
+        `/conversations/${conversationId}/messages`,
+        {
+          model,
+          pluginId,
+          pluginSettings,
+          content,
+          role: 'user', // Always set role
+        }
+      );
+      return this.getConversation(conversationId);
+    }
   }
 
   public getCompletion(params: CompletionParams) {
