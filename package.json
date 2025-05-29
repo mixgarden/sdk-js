@@ -1,6 +1,6 @@
 {
   "name": "@mixgarden/sdk",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "JavaScript/TypeScript SDK for the Mixgarden API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
