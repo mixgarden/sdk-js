@@ -20,6 +20,15 @@ export interface CompletionParams {
   temperature?: number;
 }
 
+export interface MGCompletionParams {
+  model: string;
+  content: string;
+  pluginId?: string;
+  pluginSettings?: Record<string, any>;
+  maxTokens?: number;
+  temperature?: number;
+}
+
 export class MixgardenSDK {
   private client: AxiosInstance;
   private baseUrl: string;
@@ -53,6 +62,10 @@ export class MixgardenSDK {
 
   public getCompletion(params: CompletionParams) {
     return this.request<any>('post', '/chat/completions', params);
+  }
+
+  public getMGCompletion(params: MGCompletionParams) {
+    return this.request<any>('post', '/mg-completion', params);
   }
 
   public getPlugins() {
