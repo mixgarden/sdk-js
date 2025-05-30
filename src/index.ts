@@ -56,40 +56,66 @@ export class MixgardenSDK {
     return this.request<any[]>('get', '/models');
   }
 
-  public async chat(params: ChatParams) {
-    if (params.conversationId) {
-      // Add message to existing conversation
-      const { conversationId, ...rest } = params;
-      await this.request<any>(
-        'post',
-        `/conversations/${conversationId}/messages`,
-        {
-          ...rest,
-          role: 'user', // Always set role
+  public async chat(params: {
+    conversationId?: string;
+    content: string;
+    model: string;
+    pluginId?: string;
+    pluginSettings?: Record<string, any>;
+    waitForResponse?: boolean;
+    pollInterval?: number;
+    timeout?: number;
+  }) {
+    // 1. Ensure conversation exists
+    let conversationId = params.conversationId;
+    if (!conversationId) {
+      const convRes = await this.request<any>('post', '/conversations', {
+        title: 'New Conversation',
+        model: params.model
+      });
+      conversationId = convRes.id;
+      if (!conversationId) throw new Error('Failed to create conversation');
+    }
+  
+    // 2. Add user message
+    await this.request<any>('post', `/conversations/${conversationId}/messages`, {
+      role: 'user',
+      content: params.content,
+      pluginId: params.pluginId,
+      pluginSettings: params.pluginSettings
+    });
+  
+    // 3. Start AI/plugin job
+    const genRes = await this.request<any>(
+      'post',
+      `/conversations/${conversationId}/generate`,
+      {
+        model: params.model,
+        pluginId: params.pluginId,
+        pluginSettings: params.pluginSettings
+      }
+    );
+    const jobId = genRes.jobId;
+    if (!jobId) throw new Error('No jobId returned from backend');
+  
+    // 4. Optionally poll for result
+    if (params.waitForResponse !== false) {
+      const pollInterval = params.pollInterval ?? 1500;
+      const timeout = params.timeout ?? 30000;
+      const start = Date.now();
+      while (Date.now() - start < timeout) {
+        const result = await this.request<any>('get', `/conversations/generate/status/${jobId}`);
+        if (result && result.status === 'completed' && result.result) {
+          return result.result; // The AI/plugin message
         }
-      );
-      return this.getConversation(conversationId);
+        if (result && result.status === 'failed') {
+          throw new Error(result.error || 'AI/plugin job failed');
+        }
+        await new Promise(res => setTimeout(res, pollInterval));
+      }
+      throw new Error('Timed out waiting for AI/plugin response');
     } else {
-      // Create a new conversation
-      const convoRes = await this.request<any>(
-        'post',
-        '/conversations',
-        params
-      );
-      const conversationId = convoRes.id;
-      const { model, pluginId, pluginSettings, content } = params;
-      await this.request<any>(
-        'post',
-        `/conversations/${conversationId}/messages`,
-        {
-          model,
-          pluginId,
-          pluginSettings,
-          content,
-          role: 'user', // Always set role
-        }
-      );
-      return this.getConversation(conversationId);
+      return { jobId };
     }
   }
 
