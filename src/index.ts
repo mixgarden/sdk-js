@@ -5,6 +5,31 @@ export interface SDKOptions {
   baseUrl?: string;
 }
 
+export interface PluginAuthor {
+  id: string;
+  name: string | null;
+  username: string;
+  avatar: string | null;
+}
+
+export interface Plugin {
+  id: string;
+  name: string;
+  description: string;
+  category: string; // Or an enum
+  author: PluginAuthor;
+  createdAt: string; // ISO date string
+  updatedAt: string; // ISO date string
+  version: string; // Or a more complex version object
+}
+
+export interface PaginatedPluginsResponse {
+  plugins: Plugin[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export interface ChatParams {
   model: string;
   content: string;
@@ -127,8 +152,44 @@ export class MixgardenSDK {
     return this.request<any>('post', '/mg-completion', params);
   }
 
-  public getPlugins() {
-    return this.request<any[]>('get', '/plugins');
+  /**
+   * Fetches a single page of plugins.
+   * @param page Page number to fetch.
+   * @param limit Number of plugins per page.
+   * @returns A promise that resolves to the paginated plugin response.
+   */
+  public getPlugins(page: number = 1, limit: number = 10): Promise<PaginatedPluginsResponse> {
+    return this.request<PaginatedPluginsResponse>('get', '/plugins', undefined, { page, limit });
+  }
+
+  /**
+   * Fetches all plugins by handling pagination.
+   * @param batchSize Number of plugins to fetch per backend request during pagination.
+   * @returns A promise that resolves to an array of all plugins.
+   */
+  public async getAllPlugins(batchSize: number = 50): Promise<Plugin[]> {
+    let allPlugins: Plugin[] = [];
+    let currentPage = 1;
+    let totalPlugins = 0;
+    let fetchedPlugins = 0;
+
+    do {
+      const response = await this.getPlugins(currentPage, batchSize);
+      if (response && response.plugins) {
+        allPlugins = allPlugins.concat(response.plugins);
+        fetchedPlugins = allPlugins.length;
+        if (currentPage === 1) { // Only set totalPlugins on the first call
+          totalPlugins = response.total;
+        }
+      } else {
+        // Should not happen if backend is consistent, but good to handle
+        console.error("Failed to fetch a page of plugins or received invalid response.");
+        break; 
+      }
+      currentPage++;
+    } while (fetchedPlugins < totalPlugins && totalPlugins > 0);
+
+    return allPlugins;
   }
 
   public getConversations(params?: { limit?: number; offset?: number }) {
